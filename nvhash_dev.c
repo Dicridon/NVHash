@@ -285,8 +285,8 @@ hash_destroy(TOID(struct hash) h)
             q = D_RW(p->next);
         }
         for (int j = 0; j < BUCKET_SLOTS; j++) {
-            str_free(&table->keys[i]);
-            str_free(&table->values[i]);
+            str_free(&p->keys[j]);
+            str_free(&p->values[j]);
         }
     }
     POBJ_FREE(&h_ptr->table);
