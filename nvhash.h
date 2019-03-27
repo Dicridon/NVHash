@@ -1,58 +1,35 @@
 #ifndef __FROST_NV_HASH__
 #define __FROST_NV_HASH__
-
-#define BUCKET_SLOTS (4)
-
-#include <stddef.h>
 #include <libpmemobj.h>
-#include "string.h"
+#include "nvhash_dev.h"
 
-POBJ_LAYOUT_BEGIN(nvhash);
-POBJ_LAYOUT_ROOT(nvhash, struct hash);
-POBJ_LAYOUT_TOID(nvhash, struct hash_node);
-POBJ_LAYOUT_END(nvhash);
+typedef struct nvhash {
+    TOID(struct hash) __hash__;
+} nvhash_t;
 
-struct hash_node {
-    TOID(struct string) keys[BUCKET_SLOTS];
-    TOID(struct string) values[BUCKET_SLOTS];
-    TOID(struct hash_node) next;
-    int full;
-};
-
-struct hash {
-    size_t size;
-    TOID(struct hash_node) table;
-};
-
-
-// size: size of value to be stored
-// NULL is returned if failed
-TOID(struct hash)
-new_hash(PMEMobjpool *pop, size_t size);
+nvhash_t *
+new_nvhash(PMEMobjpool *pop, size_t size);
 
 // 1 for success, -1 for failure
 int
-insert(PMEMobjpool *pop, TOID(struct hash) h, const char *key, const char *value);
+nvhash_insert(PMEMobjpool *pop,
+            nvhash_t *h, const char *key, const char *value);
 
 // NULL if failed
 const char *
-get_value(const TOID(struct hash) h, const char *key);
+nvhash_get(const nvhash_t *t, const char *key);
+
+// 1 for success, -1 for failure
+// int
+// nvhash_delete_item(PMEMobjpool *pop, nvhash_t* h, const char *key);
 
 // 1 for success, -1 for failure
 int
-delete_item(PMEMobjpool *pop, TOID(struct hash) h, const char *key);
-
-// 1 for success, -1 for failure
-int
-remove_item(PMEMobjpool *pop, TOID(struct hash) h, const char *key);
+nvhash_remove(PMEMobjpool *pop, nvhash_t* h, const char *key);
 
 void
-destroy_hash(PMEMobjpool *pop, TOID(struct hash) h);
+nvhash_destroy(nvhash_t* h);
 
 void
-serialize_hash(TOID(struct hash) h);
-
-void
-print_hash(const TOID(struct hash) h);
-
+nvhash_print(nvhash_t* h);
 #endif
